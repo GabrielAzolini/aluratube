@@ -1,3 +1,4 @@
+import React from "react";
 import config from "../config.json";
 import styled from "styled-components";
 import {CSSReset} from "../src/components/CSSReset";
@@ -5,16 +6,18 @@ import Menu from "../src/components/Menu";
 import { StyledTimeline } from "../src/components/Timeline";
 
 function HomePage() {
-    const estilosDaHomePage = {}
+    const estilosDaHomePage = {};
+    const [valorDoFiltro, setValorDoFiltro] = React.useState("");
+    
 
     //console.log(config.playlists);
     return (
         <>
             <CSSReset/>
             <div style={estilosDaHomePage} >
-                <Menu />
+                <Menu valorDoFiltro={valorDoFiltro} setValorDoFiltro={setValorDoFiltro}/>
                 <Header />
-                <Timeline playlists={config.playlists}>
+                <Timeline searchValue={valorDoFiltro} playlists={config.playlists}>
                     Conteúdo
                 </Timeline>
             </div>
@@ -39,7 +42,6 @@ const StyledHeader = styled.div`
         border-radius: 50%;
     }
     .user-info{
-        margin-top: 50px;
         display: flex;
         align-items: center;
         width: 100;
@@ -47,9 +49,17 @@ const StyledHeader = styled.div`
         gap: 16px;
     }
 `;
+const StyledBanner = styled.div`
+    background-color: blue;
+    background-image: url(${({ bg }) => bg});
+    /* background-image: url(${config.bg}); */
+    height: 230px;
+
+`
 function Header() {
     return (
         <StyledHeader>
+            <StyledBanner bg={config.bg}/>
             <section className="user-info">
                 <img src={`https://github.com/${config.github}.png`} />
                 <div>
@@ -65,22 +75,27 @@ function Header() {
     )
 }
 
-function Timeline(props) {
+function Timeline({searchValue, ...props}) {
     //console.log("Dentro do componente", props.playlists)
     const playlistNames = Object.keys(props.playlists);
     return (
         <StyledTimeline>
             {playlistNames.map((playlistName) => {
                 const videos = props.playlists[playlistName];
-                console.log(playlistName);
-                console.log(videos);
+                //console.log(playlistName);
+                //console.log(videos);
                 return (
-                    <section>
+                    <section key={playlistName}>
                         <h2>{playlistName}</h2>
                         <div>
-                            {videos.map((video) => {
+                            {videos.filter((video) => {
+
+                                const titleNormalized = video.title.toLowerCase();
+                                const searchValueNormalized = searchValue.toLowerCase();
+                                return titleNormalized.includes(searchValueNormalized)
+                            }).map((video) => {
                                     return (
-                                        <a href={video.url}>
+                                        <a key={video.url} href={video.url}>
                                             <img src={video.thumb} />
                                             <span>
                                                 {video.title}
